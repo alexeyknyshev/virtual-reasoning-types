@@ -56,104 +56,125 @@ func (s *BooleanSuite) TestIsConstant() {
 func (s *BooleanSuite) TestIsUnknown() {
 	assert := assert.New(s.T())
 
-	assert.False(s.True.IsUnknown(), "")
-	assert.False(s.False.IsUnknown(), "")
-	assert.True(s.Unknown_1.IsUnknown(), "")
-	assert.True(s.Unknown_2.IsUnknown(), "")
-	assert.True(s.Unknown_1_same.IsUnknown(), "")
+	assert.False(s.True.IsUnknown())
+	assert.False(s.False.IsUnknown())
+	assert.True(s.Unknown_1.IsUnknown())
+	assert.True(s.Unknown_2.IsUnknown())
+	assert.True(s.Unknown_1_same.IsUnknown())
 }
 
 func (s *BooleanSuite) TestNot() {
 	assert := assert.New(s.T())
 
-	assert.False(s.True.Not().IsTrue(), "")
-	assert.True(s.False.Not().IsTrue(), "")
-	assert.True(s.Unknown_1.Not().IsUnknown(), "")
-	assert.True(s.Unknown_2.Not().IsUnknown(), "")
-	assert.True(s.Unknown_1_same.IsUnknown(), "")
+	assert.True(s.True.Not().IsFalse())
+	assert.True(s.False.Not().IsTrue())
 
-	assert.True(s.True.Not().Not().IsTrue(), "")
-	assert.False(s.False.Not().Not().IsTrue(), "")
+	assert.True(s.Unknown_1.Not().IsUnknown())
+	assert.True(s.Unknown_2.Not().IsUnknown())
+	assert.True(s.Unknown_1_same.IsUnknown())
+
+	assert.True(s.True.Not().Not().IsTrue())
+	assert.False(s.False.Not().Not().IsTrue())
+}
+
+func (s *BooleanSuite) TestNotConstraints() {
+	assert := assert.New(s.T())
+
+	assert.True(s.Unknown_1.Not().Equal(s.Unknown_1).IsFalse())
+	assert.True(s.Unknown_1.Not().Equal(s.Unknown_1_same).IsFalse())
+	assert.True(s.Unknown_1.Not().Equal(s.Unknown_1_copy).IsFalse())
+
+	assert.True(s.Unknown_1_copy.Not().Equal(s.Unknown_1_copy).IsFalse())
+	assert.True(s.Unknown_1_copy.Not().Equal(s.Unknown_1).IsFalse())
+	assert.True(s.Unknown_1_copy.Not().Equal(s.Unknown_1_same).IsFalse())
+
+	assert.True(s.Unknown_1_same.Not().Equal(s.Unknown_1_same).IsFalse())
+	assert.True(s.Unknown_1_same.Not().Equal(s.Unknown_1_copy).IsFalse())
+	assert.True(s.Unknown_1_same.Not().Equal(s.Unknown_1).IsFalse())
+
+	assert.True(s.Unknown_1.Not().Not().Equal(s.Unknown_1).IsTrue())
+	assert.True(s.Unknown_1.Not().Not().Equal(s.Unknown_1_same).IsTrue())
+	assert.True(s.Unknown_1.Not().Not().Equal(s.Unknown_1_copy).IsTrue())
 }
 
 func (s *BooleanSuite) TestAnd() {
 	assert := assert.New(s.T())
 
-	/*	assert.True(s.True.And(s.True).IsTrue(), "")
-		assert.True(s.True.And(s.False).IsFalse(), "")
-		assert.True(s.True.And(s.Unknown_1).IsUnknown(), "")
-		assert.True(s.True.And(s.Unknown_1_same).IsUnknown(), "")
+	assert.True(s.True.And(s.True).IsTrue())
+	assert.True(s.True.And(s.False).IsFalse())
+	assert.True(s.True.And(s.Unknown_1).IsUnknown())
+	assert.True(s.True.And(s.Unknown_1_same).IsUnknown())
 
-		assert.True(s.False.And(s.True).IsFalse(), "")
-		assert.True(s.False.And(s.False).IsFalse(), "")
-		assert.True(s.False.And(s.Unknown_1).IsFalse(), "")
-		assert.True(s.False.And(s.Unknown_1_copy).IsFalse(), "")*/
+	assert.True(s.False.And(s.True).IsFalse())
+	assert.True(s.False.And(s.False).IsFalse())
+	assert.True(s.False.And(s.Unknown_1).IsFalse())
+	assert.True(s.False.And(s.Unknown_1_copy).IsFalse())
 
-	//	assert.True(s.Unknown_1.And(s.True).IsUnknown(), "")
-	assert.True(s.Unknown_1.And(s.False).IsFalse(), "")
-	assert.True(s.Unknown_1.And(s.Unknown_1).IsUnknown(), "")
-	assert.True(s.Unknown_1.And(s.Unknown_1_copy).IsUnknown(), "")
+	assert.True(s.Unknown_1.And(s.True).IsUnknown())
+	assert.True(s.Unknown_1.And(s.False).IsFalse())
+	assert.True(s.Unknown_1.And(s.Unknown_1).IsUnknown())
+	assert.True(s.Unknown_1.And(s.Unknown_1_copy).IsUnknown())
 }
 
 func (s *BooleanSuite) TestOr() {
 	assert := assert.New(s.T())
 
-	assert.True(s.True.Or(s.True).IsTrue(), "")
-	assert.True(s.True.Or(s.False).IsTrue(), "")
-	assert.True(s.True.Or(s.Unknown_1).IsTrue(), "")
-	assert.True(s.True.Or(s.Unknown_2).IsTrue(), "")
-	assert.True(s.True.Or(s.Unknown_1_same).IsTrue(), "")
+	assert.True(s.True.Or(s.True).IsTrue())
+	assert.True(s.True.Or(s.False).IsTrue())
+	assert.True(s.True.Or(s.Unknown_1).IsTrue())
+	assert.True(s.True.Or(s.Unknown_2).IsTrue())
+	assert.True(s.True.Or(s.Unknown_1_same).IsTrue())
 
-	assert.True(s.False.Or(s.True).IsTrue(), "")
-	assert.True(s.False.Or(s.False).IsFalse(), "")
-	assert.True(s.False.Or(s.Unknown_1).IsUnknown(), "")
-	assert.True(s.False.Or(s.Unknown_2).IsUnknown(), "")
-	assert.True(s.False.Or(s.Unknown_1_same).IsUnknown(), "")
+	assert.True(s.False.Or(s.True).IsTrue())
+	assert.True(s.False.Or(s.False).IsFalse())
+	assert.True(s.False.Or(s.Unknown_1).IsUnknown())
+	assert.True(s.False.Or(s.Unknown_2).IsUnknown())
+	assert.True(s.False.Or(s.Unknown_1_same).IsUnknown())
 
-	assert.True(s.Unknown_1.Or(s.True).IsTrue(), "")
-	assert.True(s.Unknown_1.Or(s.False).IsUnknown(), "")
-	assert.True(s.Unknown_1.Or(s.Unknown_1).IsUnknown(), "")
-	assert.True(s.Unknown_1.Or(s.Unknown_2).IsUnknown(), "")
-	assert.True(s.Unknown_1.Or(s.Unknown_1_same).IsUnknown(), "")
+	assert.True(s.Unknown_1.Or(s.True).IsTrue())
+	assert.True(s.Unknown_1.Or(s.False).IsUnknown())
+	assert.True(s.Unknown_1.Or(s.Unknown_1).IsUnknown())
+	assert.True(s.Unknown_1.Or(s.Unknown_2).IsUnknown())
+	assert.True(s.Unknown_1.Or(s.Unknown_1_same).IsUnknown())
 }
 
 func (s *BooleanSuite) TestEqual() {
 	assert := assert.New(s.T())
 
-	assert.True(s.True.Equal(s.True).IsTrue(), "")
-	assert.True(s.True.Equal(s.False).IsFalse(), "")
-	assert.True(s.True.Equal(s.Unknown_1).IsUnknown(), "")
-	assert.True(s.True.Equal(s.Unknown_2).IsUnknown(), "")
-	assert.True(s.True.Equal(s.Unknown_1_same).IsUnknown(), "")
-	assert.True(s.True.Equal(s.Unknown_1_copy).IsUnknown(), "")
+	assert.True(s.True.Equal(s.True).IsTrue())
+	assert.True(s.True.Equal(s.False).IsFalse())
+	assert.True(s.True.Equal(s.Unknown_1).IsUnknown())
+	assert.True(s.True.Equal(s.Unknown_2).IsUnknown())
+	assert.True(s.True.Equal(s.Unknown_1_same).IsUnknown())
+	assert.True(s.True.Equal(s.Unknown_1_copy).IsUnknown())
 
-	assert.True(s.False.Equal(s.True).IsFalse(), "")
-	assert.True(s.False.Equal(s.False).IsTrue(), "")
-	assert.True(s.False.Equal(s.Unknown_1).IsUnknown(), "")
-	assert.True(s.False.Equal(s.Unknown_2).IsUnknown(), "")
-	assert.True(s.False.Equal(s.Unknown_1_same).IsUnknown(), "")
-	assert.True(s.False.Equal(s.Unknown_1_copy).IsUnknown(), "")
+	assert.True(s.False.Equal(s.True).IsFalse())
+	assert.True(s.False.Equal(s.False).IsTrue())
+	assert.True(s.False.Equal(s.Unknown_1).IsUnknown())
+	assert.True(s.False.Equal(s.Unknown_2).IsUnknown())
+	assert.True(s.False.Equal(s.Unknown_1_same).IsUnknown())
+	assert.True(s.False.Equal(s.Unknown_1_copy).IsUnknown())
 
-	assert.True(s.Unknown_1.Equal(s.True).IsUnknown(), "")
-	assert.True(s.Unknown_1.Equal(s.False).IsUnknown(), "")
-	assert.True(s.Unknown_1.Equal(s.Unknown_1).IsTrue(), "")
-	assert.True(s.Unknown_1.Equal(s.Unknown_2).IsUnknown(), "")
-	assert.True(s.Unknown_1.Equal(s.Unknown_1_same).IsTrue(), "")
-	assert.True(s.Unknown_1.Equal(s.Unknown_1_copy).IsTrue(), "")
+	assert.True(s.Unknown_1.Equal(s.True).IsUnknown())
+	assert.True(s.Unknown_1.Equal(s.False).IsUnknown())
+	assert.True(s.Unknown_1.Equal(s.Unknown_1).IsTrue())
+	assert.True(s.Unknown_1.Equal(s.Unknown_2).IsUnknown())
+	assert.True(s.Unknown_1.Equal(s.Unknown_1_same).IsTrue())
+	assert.True(s.Unknown_1.Equal(s.Unknown_1_copy).IsTrue())
 
-	assert.True(s.Unknown_2.Equal(s.True).IsUnknown(), "")
-	assert.True(s.Unknown_2.Equal(s.False).IsUnknown(), "")
-	assert.True(s.Unknown_2.Equal(s.Unknown_1).IsUnknown(), "")
-	assert.True(s.Unknown_2.Equal(s.Unknown_2).IsTrue(), "")
-	assert.True(s.Unknown_2.Equal(s.Unknown_1_same).IsUnknown(), "")
-	assert.True(s.Unknown_2.Equal(s.Unknown_1_copy).IsUnknown(), "")
+	assert.True(s.Unknown_2.Equal(s.True).IsUnknown())
+	assert.True(s.Unknown_2.Equal(s.False).IsUnknown())
+	assert.True(s.Unknown_2.Equal(s.Unknown_1).IsUnknown())
+	assert.True(s.Unknown_2.Equal(s.Unknown_2).IsTrue())
+	assert.True(s.Unknown_2.Equal(s.Unknown_1_same).IsUnknown())
+	assert.True(s.Unknown_2.Equal(s.Unknown_1_copy).IsUnknown())
 
-	assert.True(s.Unknown_1_same.Equal(s.True).IsUnknown(), "")
-	assert.True(s.Unknown_1_same.Equal(s.False).IsUnknown(), "")
-	assert.True(s.Unknown_1_same.Equal(s.Unknown_1).IsTrue(), "")
-	assert.True(s.Unknown_1_same.Equal(s.Unknown_2).IsUnknown(), "")
-	assert.True(s.Unknown_1_same.Equal(s.Unknown_1_same).IsTrue(), "")
-	assert.True(s.Unknown_1_same.Equal(s.Unknown_1_copy).IsTrue(), "")
+	assert.True(s.Unknown_1_same.Equal(s.True).IsUnknown())
+	assert.True(s.Unknown_1_same.Equal(s.False).IsUnknown())
+	assert.True(s.Unknown_1_same.Equal(s.Unknown_1).IsTrue())
+	assert.True(s.Unknown_1_same.Equal(s.Unknown_2).IsUnknown())
+	assert.True(s.Unknown_1_same.Equal(s.Unknown_1_same).IsTrue())
+	assert.True(s.Unknown_1_same.Equal(s.Unknown_1_copy).IsTrue())
 }
 
 func (s *BooleanSuite) TestEqualTransitive() {
@@ -165,14 +186,14 @@ func (s *BooleanSuite) TestEqualTransitive() {
 		b := NewBooleanConst(BUnknown, []Constraint{NewBooleanEqual(a)})
 		c := NewBooleanConst(BUnknown, []Constraint{NewBooleanEqual(a)})
 
-		assert.True(a.Equal(b).IsTrue(), "")
-		assert.True(a.Equal(c).IsTrue(), "")
+		assert.True(a.Equal(b).IsTrue())
+		assert.True(a.Equal(c).IsTrue())
 
-		assert.True(b.Equal(a).IsTrue(), "")
-		assert.True(c.Equal(a).IsTrue(), "")
+		assert.True(b.Equal(a).IsTrue())
+		assert.True(c.Equal(a).IsTrue())
 
-		assert.True(b.Equal(c).IsTrue(), "")
-		assert.True(c.Equal(b).IsTrue(), "")
+		assert.True(b.Equal(c).IsTrue())
+		assert.True(c.Equal(b).IsTrue())
 	}
 
 	{
@@ -181,22 +202,29 @@ func (s *BooleanSuite) TestEqualTransitive() {
 		b := NewBooleanConst(BUnknown, []Constraint{NewBooleanEqual(a)})
 		c := NewBooleanConst(BUnknown, []Constraint{NewBooleanNotEqual(a)})
 
-		assert.True(a.Equal(b).IsTrue(), "")
-		assert.True(b.Equal(a).IsTrue(), "")
+		assert.True(a.Equal(b).IsTrue())
+		assert.True(b.Equal(a).IsTrue())
 
-		assert.True(a.Equal(c).IsFalse(), "")
-		assert.True(c.Equal(a).IsFalse(), "")
+		assert.True(a.Equal(c).IsFalse())
+		assert.True(c.Equal(a).IsFalse())
 
 	}
 
 	{
-		// [a <== c], [b]
+		// [a <== c], [ b <!= d ]
 		a := NewBoolean()
 		b := NewBoolean()
 		c := NewBooleanConst(BUnknown, []Constraint{NewBooleanEqual(a)})
+		d := NewBooleanConst(BUnknown, []Constraint{NewBooleanNotEqual(b)})
 
-		assert.True(b.Equal(c).IsUnknown(), "")
-		assert.True(c.Equal(b).IsUnknown(), "")
+		assert.True(b.Equal(c).IsUnknown())
+		assert.True(c.Equal(b).IsUnknown())
+
+		assert.True(a.Equal(d).IsUnknown())
+		assert.True(d.Equal(a).IsUnknown())
+
+		assert.True(c.Equal(d).IsUnknown())
+		assert.True(d.Equal(c).IsUnknown())
 	}
 
 	{
@@ -211,8 +239,8 @@ func (s *BooleanSuite) TestEqualTransitive() {
 
 		for i := 0; i < len(eqChain)-1; i++ {
 			for j := i + 1; j < len(eqChain); j++ {
-				assert.True(eqChain[i].Equal(eqChain[j]).IsTrue(), "")
-				assert.True(eqChain[j].Equal(eqChain[i]).IsTrue(), "")
+				assert.True(eqChain[i].Equal(eqChain[j]).IsTrue())
+				assert.True(eqChain[j].Equal(eqChain[i]).IsTrue())
 			}
 		}
 	}
@@ -224,20 +252,20 @@ func (s *BooleanSuite) TestEqualTransitive() {
 		c := NewBooleanConst(BUnknown, []Constraint{NewBooleanNotEqual(a)})
 		d := NewBooleanConst(BUnknown, []Constraint{NewBooleanNotEqual(b)})
 
-		assert.True(a.Equal(b).IsTrue(), "")
-		assert.True(b.Equal(a).IsTrue(), "")
+		assert.True(a.Equal(b).IsTrue())
+		assert.True(b.Equal(a).IsTrue())
 
-		assert.True(c.Equal(a).IsFalse(), "")
-		assert.True(a.Equal(c).IsFalse(), "")
+		assert.True(c.Equal(a).IsFalse())
+		assert.True(a.Equal(c).IsFalse())
 
-		assert.True(b.Equal(c).IsFalse(), "")
-		assert.True(c.Equal(b).IsFalse(), "")
+		assert.True(b.Equal(c).IsFalse())
+		assert.True(c.Equal(b).IsFalse())
 
-		assert.True(d.Equal(b).IsFalse(), "")
-		assert.True(b.Equal(d).IsFalse(), "")
+		assert.True(d.Equal(b).IsFalse())
+		assert.True(b.Equal(d).IsFalse())
 
-		assert.True(d.Equal(a).IsFalse(), "")
-		assert.True(a.Equal(d).IsFalse(), "")
+		assert.True(d.Equal(a).IsFalse())
+		assert.True(a.Equal(d).IsFalse())
 	}
 
 	{
@@ -250,12 +278,22 @@ func (s *BooleanSuite) TestEqualTransitive() {
 
 		f := NewBooleanConst(BUnknown, []Constraint{NewBooleanNotEqual(e)})
 
-		assert.True(a.Equal(e).IsTrue(), "")
-		assert.True(e.Equal(a).IsTrue(), "")
+		assert.True(a.Equal(e).IsTrue())
+		assert.True(e.Equal(a).IsTrue())
 
-		assert.True(a.Equal(f).IsFalse(), "")
-		assert.True(f.Equal(a).IsFalse(), "")
+		assert.True(a.Equal(f).IsFalse())
+		assert.True(f.Equal(a).IsFalse())
 	}
+}
+
+func (s *BooleanSuite) TestSameNotEqualTarget() {
+	assert := assert.New(s.T())
+
+	not_eq_1 := NewBooleanConst(BUnknown, []Constraint{NewBooleanNotEqual(s.Unknown_1)})
+	not_eq_2 := NewBooleanConst(BUnknown, []Constraint{NewBooleanNotEqual(s.Unknown_1)})
+
+	assert.True(not_eq_1.Equal(not_eq_2).IsTrue())
+	assert.True(not_eq_2.Equal(not_eq_1).IsTrue())
 }
 
 func TestBoolean(t *testing.T) {

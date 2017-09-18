@@ -10,6 +10,72 @@ func errInverseInvalidBoolean(action string) error {
 	return fmt.Errorf("could not inserse %s constraint on non-Boolean value", action)
 }
 
+// ====== BooleanOr ======
+
+type BooleanOr struct {
+	variants []Constraint
+}
+
+func NewBooleanOr(variants ...Constraint) BooleanOr {
+	variantsLen := len(variants)
+	if variantsLen < 2 {
+		panic("expected atleast 2 variants for BooleanOr construction")
+	}
+	variantsArr := make([]Constraint, variantsLen)
+	for i, v := range variants {
+		variantsArr[i] = v
+	}
+	return BooleanOr{variants: variants}
+}
+
+func (c BooleanOr) Name() string {
+	return "BooleanOr"
+}
+
+func (c BooleanOr) Equal(object interface{}) (BValue, error) {
+	res := BUnknown
+	var err error
+	for _, v := range c.variants {
+		res, err = v.Equal(object)
+		if err != nil || res == BTrue {
+			return res, err
+		}
+	}
+	return res, err
+}
+
+func (c BooleanOr) NotEqual(object interface{}) (BValue, error) {
+	res := BUnknown
+	var err error
+	for _, v := range c.variants {
+		res, err = v.NotEqual(object)
+		if err != nil || res == BTrue {
+			return res, err
+		}
+	}
+	return res, err
+}
+
+func (c BooleanOr) Inverse(subject interface{}) (Constraint, error) {
+	variants := make([]Constraint, len(c.variants))
+	for i, v := range c.variants {
+		res, err := v.Inverse(subject)
+		if err != nil {
+			return nil, err
+		}
+		variants[i] = res
+	}
+	return NewBooleanOr(variants...), nil
+}
+
+/*func (c BooleanOr) Unbox() []interface{} {
+	var res []interface{}
+	for _, c := range c.variants {
+		res = append(res, c.Unbox())
+	}
+	return res
+}*/
+
 // ====== BooleanEqual ======
 
 type BooleanEqual struct {
@@ -36,7 +102,7 @@ func (c BooleanEqual) Equal(object interface{}) (BValue, error) {
 		}
 		return BFalse, nil
 	}
-	return BInvalid, errApplyInvalidBoolean("BooleanEqual")
+	return -1, errApplyInvalidBoolean("BooleanEqual")
 }
 
 func (c BooleanEqual) NotEqual(object interface{}) (BValue, error) {
@@ -51,7 +117,7 @@ func (c BooleanEqual) NotEqual(object interface{}) (BValue, error) {
 		}
 		return BTrue, nil
 	}
-	return BInvalid, errApplyInvalidBoolean("BooleanEqual")
+	return -1, errApplyInvalidBoolean("BooleanEqual")
 }
 
 func (c BooleanEqual) Inverse(subject interface{}) (Constraint, error) {
@@ -91,7 +157,7 @@ func (c BooleanNotEqual) Equal(object interface{}) (BValue, error) {
 		}
 		return BTrue, nil
 	}
-	return BInvalid, errApplyInvalidBoolean("BooleanNotEqual")
+	return -1, errApplyInvalidBoolean("BooleanNotEqual")
 }
 
 func (c BooleanNotEqual) NotEqual(object interface{}) (BValue, error) {
@@ -106,7 +172,7 @@ func (c BooleanNotEqual) NotEqual(object interface{}) (BValue, error) {
 		}
 		return BFalse, nil
 	}
-	return BInvalid, errApplyInvalidBoolean("BooleanNotEqual")
+	return -1, errApplyInvalidBoolean("BooleanNotEqual")
 }
 
 func (c BooleanNotEqual) Inverse(subject interface{}) (Constraint, error) {
@@ -132,14 +198,14 @@ func (c BooleanDummyConstraint) Equal(object interface{}) (BValue, error) {
 	if _, ok := object.(*BooleanPrivate); ok {
 		return BUnknown, nil
 	}
-	return BInvalid, errApplyInvalidBoolean("BooleanDummyConstraint")
+	return -1, errApplyInvalidBoolean("BooleanDummyConstraint")
 }
 
 func (c BooleanDummyConstraint) NotEqual(object interface{}) (BValue, error) {
 	if _, ok := object.(*BooleanPrivate); ok {
 		return BUnknown, nil
 	}
-	return BInvalid, errApplyInvalidBoolean("BooleanDummyConstrain")
+	return -1, errApplyInvalidBoolean("BooleanDummyConstrain")
 }
 
 func (c BooleanDummyConstraint) Inverse(subject interface{}) (Constraint, error) {

@@ -6,7 +6,6 @@ const (
 	BFalse BValue = iota
 	BTrue
 	BUnknown
-	BInvalid
 )
 
 type BooleanPrivate struct {
@@ -29,7 +28,7 @@ func (p *BooleanPrivate) equal(o *BooleanPrivate) *BooleanPrivate {
 	res := BUnknown
 	if p.val == BUnknown {
 		var err error
-		res, err = checkConstraints(p, o, constraintEqualAllVisitor)
+		res, err = checkConstraintsBoolean(p, o, constraintBooleanEqualAllVisitor)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -40,7 +39,7 @@ func (p *BooleanPrivate) equal(o *BooleanPrivate) *BooleanPrivate {
 	}
 
 	if o.val == BUnknown {
-		new_res, err := checkConstraints(o, p, constraintEqualAllVisitor)
+		new_res, err := checkConstraintsBoolean(o, p, constraintBooleanEqualAllVisitor)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -75,9 +74,9 @@ func (p *BooleanPrivate) not() *BooleanPrivate {
 	}
 }
 
-type constraintFunc func(c Constraint, o *BooleanPrivate) (BValue, error)
+type constraintFuncBoolean func(c Constraint, o *BooleanPrivate) (BValue, error)
 
-func checkConstraints(p, o *BooleanPrivate, f constraintFunc) (BValue, error) {
+func checkConstraintsBoolean(p, o *BooleanPrivate, f constraintFuncBoolean) (BValue, error) {
 	res := BUnknown
 	for _, c := range p.constraints {
 		r, err := f(c, o)
@@ -123,7 +122,7 @@ func (b Boolean) IsSame(o Boolean) bool {
 	return b.p.val == o.p.val
 }
 
-func constraintEqualAllVisitor(c Constraint, o *BooleanPrivate) (BValue, error) {
+func constraintBooleanEqualAllVisitor(c Constraint, o *BooleanPrivate) (BValue, error) {
 	return c.Equal(o)
 }
 
@@ -139,15 +138,16 @@ func (b Boolean) And(o Boolean) Boolean {
 	if b.p.val == BFalse {
 		return b
 	} else if b.p.val == BUnknown {
-		res, err := checkConstraints(b.p, o.p, constraintEqualAllVisitor)
+		res, err := checkConstraintsBoolean(b.p, o.p, constraintBooleanEqualAllVisitor)
 		if err != nil {
 			panic(err.Error())
 		}
 		if res == BFalse {
 			return NewBooleanConst(BFalse, []Constraint{
-				NewConstraintOr([]Constraint{
-					NewBooleanEqual(b), NewBooleanEqual(o),
-				}),
+				NewBooleanOr(
+					NewBooleanEqual(b),
+					NewBooleanEqual(o),
+				),
 			})
 		}
 	}
@@ -155,22 +155,24 @@ func (b Boolean) And(o Boolean) Boolean {
 	if o.p.val == BFalse {
 		if b.p.val == BUnknown {
 			return NewBooleanConst(BFalse, []Constraint{
-				NewConstraintOr([]Constraint{
-					NewBooleanEqual(b), NewBooleanEqual(o),
-				}),
+				NewBooleanOr(
+					NewBooleanEqual(b),
+					NewBooleanEqual(o),
+				),
 			})
 		}
 	} else if o.p.val == BUnknown {
-		res, err := checkConstraints(o.p, b.p, constraintEqualAllVisitor)
+		res, err := checkConstraintsBoolean(o.p, b.p, constraintBooleanEqualAllVisitor)
 		if err != nil {
 			panic(err.Error())
 		}
 		if res == BFalse {
 			if b.p.val == BUnknown {
 				return NewBooleanConst(BFalse, []Constraint{
-					NewConstraintOr([]Constraint{
-						NewBooleanEqual(b), NewBooleanEqual(o),
-					}),
+					NewBooleanOr(
+						NewBooleanEqual(b),
+						NewBooleanEqual(o),
+					),
 				})
 			}
 			return NewBooleanConst(BFalse, []Constraint{
@@ -181,9 +183,10 @@ func (b Boolean) And(o Boolean) Boolean {
 
 	if b.p.val == BUnknown {
 		return NewBooleanConst(BUnknown, []Constraint{
-			NewConstraintOr([]Constraint{
-				NewBooleanEqual(b), NewBooleanEqual(o),
-			}),
+			NewBooleanOr(
+				NewBooleanEqual(b),
+				NewBooleanEqual(o),
+			),
 		})
 	}
 
@@ -203,9 +206,10 @@ func (b Boolean) Or(o Boolean) Boolean {
 	}
 
 	return NewBooleanConst(res, []Constraint{
-		NewConstraintOr([]Constraint{
-			NewBooleanEqual(b), NewBooleanEqual(o),
-		}),
+		NewBooleanOr(
+			NewBooleanEqual(b),
+			NewBooleanEqual(o),
+		),
 	})
 }
 
